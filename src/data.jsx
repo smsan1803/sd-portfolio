@@ -158,6 +158,20 @@ export const workGroups = [
         tools: ["Illustrator", "Photoshop"],
         images: [pic("vizitke"), pic("studio-design-vizitke"), pic("drive-safe-vizitke-izrez")],
       },
+      {
+        id: "dorigami-vizitka",
+        title: { hr: "Dorigami — vizitka", en: "Dorigami — business card" },
+        thumb: img("radovi/dorigami-vizitka.jpg"),
+        scope: {
+          hr: ["Dizajn prednje i stražnje strane", "Origami znak", "Priprema za tisak"],
+          en: ["Front & back design", "Origami mark", "Prepress"],
+        },
+        text: {
+          hr: "Vizitka za Dorigami, origami umjetnost Dore Carević. Prednja strana nosi geometrijski origami znak u zlatnim tonovima na tamnoljubičastoj podlozi, a stražnja kontakt podatke i web adresu uz ukrasnu traku s rozetom. Pripremljeno za tisak u CMYK-u, s napustom od 3 mm i zaobljenim kutovima.",
+          en: "A business card for Dorigami, Dora Carević's origami art. The front carries a geometric origami mark in gold tones on deep plum, and the back holds the contact details and web address beside a decorative band with the rosette. Prepared for print in CMYK, with 3 mm bleed and rounded corners.",
+        },
+        images: [pic("dorigami-vizitka")],
+      },
     ],
   },
   {
@@ -354,6 +368,17 @@ export const workGroups = [
         tools: [{ hr: "AI alati", en: "AI tools" }],
       },
       {
+        id: "dorigami-web",
+        title: { hr: "Dorigami", en: "Dorigami" },
+        icon: "</>",
+        scope: { hr: ["React", "HR/EN", "Galerija i virtualna šetnja"], en: ["React", "HR/EN", "Gallery & virtual walk"] },
+        text: {
+          hr: "Dvojezična React stranica za origami umjetnicu: galerija radova, virtualna šetnja izložbom, tehnike i cjenik.",
+          en: "A bilingual React site for an origami artist: a gallery of works, a virtual exhibition walk, techniques and prices.",
+        },
+        href: "https://dorigami.netlify.app/",
+      },
+      {
         id: "ds-studio",
         title: { hr: "DS Design Studio", en: "DS Design Studio" },
         icon: "</>",
@@ -362,7 +387,7 @@ export const workGroups = [
           hr: "Višejezična React stranica za studio fotografije, dizajna, videa i weba.",
           en: "A multilingual React site for a photo, design, video and web studio.",
         },
-        href: "https://front3.edukacija.online/sdoblanovic/ds-design-studio/hr",
+        href: "https://design-studio-ds.netlify.app/",
       },
       {
         id: "manestra",
@@ -373,7 +398,7 @@ export const workGroups = [
           hr: "Stranica catering servisa — ispitni projekt front-end developer programa.",
           en: "A catering website — the final exam project of my front-end developer programme.",
         },
-        href: "https://front3.edukacija.online/sdoblanovic/manestra-catering/",
+        href: "https://manestracatering.netlify.app/",
       },
     ],
   },
