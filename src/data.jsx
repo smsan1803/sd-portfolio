@@ -26,8 +26,8 @@ export const person = {
   firstName: "Sandra",
   role: { hr: "Grafička dizajnerica", en: "Graphic Designer" },
   roles: {
-    hr: ["Ambalaža", "Vizualni identitet", "Prijelom & print", "Web & WordPress", "Fotografija"],
-    en: ["Packaging", "Visual identity", "Layout & print", "Web & WordPress", "Photography"],
+    hr: ["Ambalaža", "Produktna fotografija", "Vizualni identitet", "Print", "Web & WordPress", "Kampanje", "AI alati"],
+    en: ["Packaging", "Product photography", "Visual identity", "Print", "Web & WordPress", "Campaigns", "AI tools"],
   },
   location: { hr: "Zagreb, Hrvatska", en: "Zagreb, Croatia" },
   email: "sandradoblanovic@gmail.com",
@@ -45,14 +45,18 @@ export const person = {
 export const hero = {
   greeting: { hr: "Bok, ja sam Sandra.", en: "Hi, I'm Sandra." },
   titleA: { hr: "Dizajniram ", en: "I design " },
-  titleAccent: { hr: "ambalažu", en: "packaging" },
+  // riječi se izmjenjuju jedna za drugom
+  titleWords: {
+    hr: ["ambalažu", "vizualne identitete", "tiskane materijale", "web stranice", "fotografije"],
+    en: ["packaging", "visual identities", "print", "websites", "photography"],
+  },
   titleB: {
-    hr: ", identitete i vizuale — od ideje do tiska.",
-    en: ", identities and visuals — from idea to print.",
+    hr: "od ideje do gotovog proizvoda.",
+    en: "from idea to finished product.",
   },
   lead: {
-    hr: "Grafička dizajnerica s iskustvom u razvoju proizvoda, web dizajnu i fotografiji. Volim kad je dizajn lijep na prvi pogled i precizan do zadnjeg milimetra.",
-    en: "Graphic designer with a background in product development, web design and photography. I like design that looks good at first glance and is precise down to the last millimetre.",
+    hr: "Grafička dizajnerica s iskustvom u razvoju proizvoda, dizajnu ambalaže, pripremi za tisak, produktnim vizualima i administraciji web trgovina. Volim kad je dizajn lijep na prvi pogled i precizan do zadnjeg milimetra.",
+    en: "Graphic designer with experience in product development, packaging design, prepress, product visuals and web shop administration. I like design that looks good at first glance and is precise down to the last millimetre.",
   },
 };
 
@@ -63,6 +67,13 @@ export const services = [
     text: {
       hr: "Dizajn kutija i etiketa, prilagodba dielineu, provjera datoteka i tehnički ispravan PDF za tiskaru.",
       en: "Box and label design, dieline adaptation, preflight checks and print-ready PDFs.",
+    },
+  },
+  {
+    title: { hr: "Produktna fotografija i obrada", en: "Product photography & retouching" },
+    text: {
+      hr: "Produktne, lifestyle i 360° fotografije — studijska rasvjeta, retuš i dorada uz pomoć AI alata.",
+      en: "Product, lifestyle and 360° photography — studio lighting, retouching and AI-assisted refinement.",
     },
   },
   {
@@ -77,13 +88,6 @@ export const services = [
     text: {
       hr: "Prijelom publikacija i brošura u InDesignu, vizitke, letci, plakati i promotivni materijali.",
       en: "Publication and brochure layout in InDesign, business cards, flyers, posters and promo materials.",
-    },
-  },
-  {
-    title: { hr: "Produktna fotografija i obrada", en: "Product photography & retouching" },
-    text: {
-      hr: "Produktne, lifestyle i 360° fotografije — studijska rasvjeta, retuš i dorada uz pomoć AI alata.",
-      en: "Product, lifestyle and 360° photography — studio lighting, retouching and AI-assisted refinement.",
     },
   },
   {
@@ -109,18 +113,201 @@ export const services = [
    - text: opis koji se vidi u pogledu projekta
    - images: slike u pogledu projekta (redom, velike)
    - href: ako postoji, kartica vodi na vanjsku stranicu umjesto pogleda projekta
+   - kind: vrsta projekta — "work" (posao), "client" (za klijenta), "personal" (osobni)
+           ili "edu" (edukacija / vježba). Izostavi ako ne želiš oznaku.
+   - kit: popis opreme (za studio); svakoj stavci možeš dodati photo: img("...") za pravu fotografiju
    ==================================================================== */
 const pic = (name, caption) => ({ src: img(`radovi/${name}.jpg`), caption });
+const pic2 = (path) => ({ src: img(path) });
 
 export const workGroups = [
   {
-    id: "print",
-    title: { hr: "Prijelom i print", en: "Editorial & print" },
+    id: "ambalaza",
+    title: { hr: "Ambalaža i produktni dizajn", en: "Packaging & product design" },
     text: {
-      hr: "Publikacije, brošure i tiskani materijali — od mreže stranice do PDF-a za tiskaru.",
-      en: "Publications, brochures and printed matter — from page grid to press-ready PDF.",
+      hr: "Kutije, etikete i priprema za tisak — ambalaža koja je prepoznatljiva na polici i besprijekorna u proizvodnji.",
+      en: "Boxes, labels and prepress — packaging that stands out on the shelf and holds up in production.",
     },
     projects: [
+      {
+        id: "kutije",
+        kind: "work",
+        title: { hr: "Ambalaža za elektroniku i male kućanske uređaje", en: "Electronics & small appliance packaging" },
+        thumb: img("radovi/ambalaza-karaoke-cut.jpg"),
+        scope: {
+          hr: ["Dizajn kutije", "Lifestyle i produktne fotografije", "Ikone značajki", "Priprema za tisak"],
+          en: ["Box design", "Lifestyle & product photos", "Feature icons", "Prepress"],
+        },
+        text: {
+          hr: "Ambalaža za proizvode iz razvoja: dječji karaoke zvučnik s razigranom lifestyle fotografijom i kontaktni grill s proizvodom u prvom planu. Posao obuhvaća raspored na dielineu, obradu fotografija, ikone značajki, tekstove i tehnički ispravne datoteke za tiskaru.",
+          en: "Packaging for products in development: a kids' karaoke speaker with a playful lifestyle photo and a contact grill with the product front and centre. The work covers dieline layout, photo editing, feature icons, copy and technically correct files for the printer.",
+        },
+        tools: ["Illustrator", "Photoshop", "InDesign"],
+        images: [pic("ambalaza-karaoke-cut"), pic("ambalaza-grill")],
+      },
+      {
+        id: "baredina",
+        title: { hr: "Baredina — etikete i ambalaža", en: "Baredina — labels & packaging" },
+        thumb: img("radovi/baredina-etikete-cut.jpg"),
+        scope: {
+          hr: ["Prednja i stražnja etiketa", "Ilustracija", "Display ambalaža", "QR kod"],
+          en: ["Front & back label", "Illustration", "Display packaging", "QR code"],
+        },
+        text: {
+          hr: "Etikete i ambalaža za istarsko ekstra djevičansko maslinovo ulje. Crno-zlatna prednja etiketa s ilustracijom stabla masline, zlatna stražnja etiketa s QR kodom te maslinasti display za policu.",
+          en: "Labels and packaging for an Istrian extra virgin olive oil. A black-and-gold front label with an olive tree illustration, a gold back label with a QR code and an olive-green shelf display.",
+        },
+        tools: ["Illustrator", "Photoshop"],
+        images: [pic("baredina-etikete-cut"), pic("baredina-ambalaza-cut")],
+      },
+    ],
+  },
+  {
+    id: "foto",
+    title: { hr: "Produktna fotografija i vizuali", en: "Product photography & visuals" },
+    text: {
+      hr: "Od snimanja u malom studijskom postavu do retuša, 360° prikaza i lifestyle vizuala.",
+      en: "From shooting with a small studio setup to retouching, 360° views and lifestyle visuals.",
+    },
+    projects: [
+      {
+        id: "lifestyle",
+        kind: "work",
+        title: { hr: "Produktni i lifestyle vizuali", en: "Product & lifestyle visuals" },
+        thumb: img("radovi/lifestyle-vizual.jpg"),
+        scope: {
+          hr: ["Lifestyle vizuali", "360° fotografija", "Retuš", "Dorada uz AI alate"],
+          en: ["Lifestyle visuals", "360° photography", "Retouching", "AI-assisted refinement"],
+        },
+        text: {
+          hr: "Vizuali proizvoda za web trgovine, kataloge i ambalažu: lifestyle scene, produktne i 360° fotografije. Fotografije obrađujem i retuširam u Photoshopu, a za dorade (proširenje pozadine, čišćenje, kompoziciju scene) koristim i AI alate.",
+          en: "Product visuals for web shops, catalogues and packaging: lifestyle scenes, product shots and 360° photography. I edit and retouch in Photoshop and use AI tools for refinements such as extending backgrounds, clean-up and scene composition.",
+        },
+        tools: ["Photoshop", { hr: "AI alati", en: "AI tools" }],
+        images: [pic("lifestyle-vizual")],
+      },
+      {
+        id: "studio",
+        title: { hr: "Mini foto studio za produktne fotografije", en: "Mini photo studio for product shots" },
+        thumb: img("studio/studio-postav.jpg"),
+        scope: {
+          hr: ["Studijska rasvjeta", "Pozadinsko platno", "360° rotacijska platforma", "Foto box 40 × 40 cm", "Nikon D5500"],
+          en: ["Studio lighting", "Backdrop", "360° turntable", "40 × 40 cm photo box", "Nikon D5500"],
+        },
+        text: {
+          hr: "Za produktne fotografije koristim mali studijski postav: rasvjetu za ravnomjerno svjetlo bez oštrih sjena, pozadinska platna za čiste ili lifestyle pozadine, rotacijsku platformu za 360° prikaze, foto box 40 × 40 cm za manje proizvode i fotoaparat Nikon D5500. Iz istog postava nastaju fotografije za web trgovinu, ambalažu i kataloge.",
+          en: "For product photos I use a small studio setup: lighting for even, soft light without harsh shadows, backdrop fabrics for clean or lifestyle backgrounds, a turntable for 360° views, a 40 × 40 cm photo box for smaller products and a Nikon D5500 camera. The same setup produces images for the web shop, packaging and catalogues.",
+        },
+        kit: [
+          {
+            icon: "light",
+            photo: img("studio/light.jpg"),
+            title: { hr: "Studijska rasvjeta", en: "Studio lighting" },
+            text: { hr: "Mekano, ravnomjerno svjetlo bez oštrih sjena.", en: "Soft, even light without harsh shadows." },
+          },
+          {
+            icon: "backdrop",
+            photo: img("studio/backdrop.jpg"),
+            title: { hr: "Pozadinska platna", en: "Backdrop fabrics" },
+            text: { hr: "Čista bijela ili obojena pozadina, ovisno o namjeni.", en: "Clean white or coloured backgrounds, depending on use." },
+          },
+          {
+            icon: "turntable",
+            photo: img("studio/turntable.jpg"),
+            title: { hr: "360° rotacijska platforma", en: "360° turntable" },
+            text: { hr: "Niz fotografija iz svih kutova za interaktivni 360° prikaz.", en: "A full set of angles for an interactive 360° view." },
+          },
+          {
+            icon: "box",
+            photo: img("studio/box.jpg"),
+            title: { hr: "Foto box 40 × 40 cm", en: "40 × 40 cm photo box" },
+            text: { hr: "Za male proizvode i dodatke, s kontroliranim svjetlom.", en: "For small products and accessories, with controlled light." },
+          },
+          {
+            icon: "camera",
+            photo: img("studio/nikon.jpg"),
+            title: { hr: "Nikon D5500", en: "Nikon D5500" },
+            text: { hr: "Fotoaparat za produktne i 360° serije fotografija.", en: "The camera for product shots and 360° photo series." },
+          },
+        ],
+        images: [pic2("studio/studio-postav.jpg")],
+      },
+    ],
+  },
+  {
+    id: "identitet",
+    title: { hr: "Vizualni identitet i grafički dizajn", en: "Visual identity & graphic design" },
+    text: {
+      hr: "Znakovi, palete i tipografija te njihova primjena — od vizitki i mercha do publikacija.",
+      en: "Marks, palettes and typography and how they're applied — from business cards and merch to publications.",
+    },
+    projects: [
+      {
+        id: "vizitke",
+        title: { hr: "Izrada vizitki", en: "Business cards" },
+        thumb: img("radovi/dorigami-vizitka-cut.jpg"),
+        scope: {
+          hr: ["Dizajn prednje i stražnje strane", "Hijerarhija kontakt podataka", "Priprema za tisak"],
+          en: ["Front & back design", "Contact hierarchy", "Prepress"],
+        },
+        text: {
+          hr: "Vizitke za tri različita klijenta, svaka u jeziku svog identiteta. Dorigami: geometrijski origami znak u zlatnim tonovima na tamnoljubičastoj podlozi, a na poleđini kontakti i web adresa uz ukrasnu traku s rozetom. Studio Design: tamna brušena metalna tekstura s magenta-ljubičastim valom. Drive Safe: živa zelena i tamnoplava iz identiteta agencije, sa sloganom na prednjoj strani i ikonama kontakata na stražnjoj.",
+          en: "Business cards for three different clients, each speaking the language of its own identity. Dorigami: a geometric origami mark in gold tones on deep plum, with the contacts and web address on the back beside a decorative band with the rosette. Studio Design: a dark brushed-metal texture with a magenta-violet wave. Drive Safe: the agency's vivid green and deep blue, with the slogan on the front and contact icons on the back.",
+        },
+        tools: ["Illustrator", "Photoshop"],
+        images: [
+          pic("dorigami-vizitka-cut"),
+          pic("studio-design-vizitke-cut"),
+          pic("drive-safe-vizitke-izrez-cut"),
+        ],
+      },
+      {
+        id: "wash",
+        title: { hr: "W.A.S.H. — vizualni identitet", en: "W.A.S.H. — visual identity" },
+        thumb: img("radovi/wash-memorandum.jpg"),
+        scope: {
+          hr: ["Logo", "Memorandum i kuverte", "Brošura", "Izlog i natpisi"],
+          en: ["Logo", "Stationery", "Brochure", "Shop window & signage"],
+        },
+        text: {
+          hr: "Identitet samoposlužne praonice rublja „Wait And Stay Happy”: slova obješena na štipaljke, vodeni motivi i vesela paleta. Primijenjen na memorandum, kuverte, vizitke, brošuru, izlog i natpise.",
+          en: "An identity for the self-service laundry “Wait And Stay Happy”: letters hung on clothes pegs, water motifs and a cheerful palette. Applied to stationery, envelopes, cards, a brochure, shop windows and signage.",
+        },
+        tools: ["Illustrator", "InDesign", "Photoshop"],
+        images: [pic("wash-memorandum"), pic("wash-brosura"), pic("wash-izlog")],
+      },
+      {
+        id: "drive-safe",
+        title: { hr: "Drive Safe — Rent A Car", en: "Drive Safe — Rent A Car" },
+        thumb: img("radovi/drive-safe-vizitke-izrez-cut.jpg"),
+        scope: {
+          hr: ["Logo", "Paleta i tipografija", "Vizitke", "Merch i oglašavanje"],
+          en: ["Logo", "Palette & typography", "Business cards", "Merch & ads"],
+        },
+        text: {
+          hr: "Identitet agencije za najam vozila: znak s automobilom i inicijalima, zeleno-plava paleta, Fira Sans kao tipografija te primjena na vizitke, odjeću, šalice i oglase.",
+          en: "An identity for a car rental agency: a car-and-initials mark, a green-and-blue palette, Fira Sans as the typeface and applications on cards, apparel, mugs and ads.",
+        },
+        tools: ["Illustrator", "Photoshop"],
+        images: ["drive-safe-logo-cut", "drive-safe-boje", "drive-safe-vizitke-izrez-cut", "drive-safe-merch"].map((n) => pic(n)),
+        link: { label: "Behance", href: "https://www.behance.net/gallery/179541989/Rent-A-Car-Drive-Safe" },
+      },
+      {
+        id: "hairway",
+        title: { hr: "Hairway to Heaven", en: "Hairway to Heaven" },
+        thumb: img("radovi/hairway-identitet.jpg"),
+        scope: {
+          hr: ["Logo", "Društvene mreže", "Cjenik", "Natpisi i merch"],
+          en: ["Logo", "Social media", "Price list", "Signage & merch"],
+        },
+        text: {
+          hr: "Identitet frizerskog salona u crno-zlatnoj paleti: logo, objave za društvene mreže, cjenik usluga, natpisi i merch.",
+          en: "A black-and-gold identity for a hair salon: logo, social media posts, price list, signage and merch.",
+        },
+        tools: ["Illustrator", "Photoshop", "InDesign"],
+        images: ["hairway-identitet", "hairway-cjenik", "hairway-merch"].map((n) => pic(n)),
+        link: { label: "Behance", href: "https://www.behance.net/gallery/180639775/Hair-salon-Hairway-To-Heaven" },
+      },
       {
         id: "stories",
         title: { hr: "Stories of Change — prijelom publikacije", en: "Stories of Change — editorial layout" },
@@ -144,156 +331,76 @@ export const workGroups = [
         link: { label: "Behance", href: "https://www.behance.net/gallery/217215077/Booklet-Examples" },
       },
       {
-        id: "vizitke",
-        title: { hr: "Izrada vizitki", en: "Business cards" },
-        thumb: img("radovi/vizitke.jpg"),
+        id: "ilustracija",
+        title: { hr: "Ilustracija i digitalna grafika", en: "Illustration & digital art" },
+        thumb: img("radovi/bicikl-merch-cut.jpg"),
         scope: {
-          hr: ["Dizajn prednje i stražnje strane", "Hijerarhija kontakt podataka", "Priprema za tisak"],
-          en: ["Front & back design", "Contact hierarchy", "Prepress"],
+          hr: ["Vektorska ilustracija", "Merch", "Apstraktne pozadine"],
+          en: ["Vector illustration", "Merch", "Abstract wallpapers"],
         },
         text: {
-          hr: "Vizitke za dva različita klijenta. Studio Design: tamna brušena metalna tekstura s magenta-ljubičastim valom. Drive Safe: živa zelena i tamnoplava iz identiteta agencije, sa sloganom na prednjoj strani i ikonama kontakata na stražnjoj.",
-          en: "Business cards for two different clients. Studio Design: a dark brushed-metal texture with a magenta-violet wave. Drive Safe: the agency's vivid green and deep blue, with the slogan on the front and contact icons on the back.",
+          hr: "Vektorska ilustracija bicikla primijenjena na majice, torbe, šalice — pa i kao tattoo — te serija apstraktnih digitalnih pozadina.",
+          en: "A vector bicycle illustration applied to T-shirts, tote bags, mugs — and even as a tattoo — plus a series of abstract digital wallpapers.",
         },
         tools: ["Illustrator", "Photoshop"],
-        images: [pic("vizitke"), pic("studio-design-vizitke"), pic("drive-safe-vizitke-izrez")],
-      },
-      {
-        id: "dorigami-vizitka",
-        title: { hr: "Dorigami — vizitka", en: "Dorigami — business card" },
-        thumb: img("radovi/dorigami-vizitka.jpg"),
-        scope: {
-          hr: ["Dizajn prednje i stražnje strane", "Origami znak", "Priprema za tisak"],
-          en: ["Front & back design", "Origami mark", "Prepress"],
-        },
-        text: {
-          hr: "Vizitka za Dorigami, origami umjetnost Dore Carević. Prednja strana nosi geometrijski origami znak u zlatnim tonovima na tamnoljubičastoj podlozi, a stražnja kontakt podatke i web adresu uz ukrasnu traku s rozetom. Pripremljeno za tisak u CMYK-u, s napustom od 3 mm i zaobljenim kutovima.",
-          en: "A business card for Dorigami, Dora Carević's origami art. The front carries a geometric origami mark in gold tones on deep plum, and the back holds the contact details and web address beside a decorative band with the rosette. Prepared for print in CMYK, with 3 mm bleed and rounded corners.",
-        },
-        images: [pic("dorigami-vizitka")],
+        images: [pic("bicikl-merch-cut"), pic("bicikl-tattoo"), pic("apstraktne-pozadine")],
       },
     ],
   },
   {
-    id: "ambalaza",
-    title: { hr: "Ambalaža", en: "Packaging" },
+    id: "web",
+    title: { hr: "Digitalni sadržaj i web", en: "Digital content & web" },
     text: {
-      hr: "Kutije i etikete koje moraju biti prepoznatljive na polici i besprijekorne u proizvodnji.",
-      en: "Boxes and labels that stand out on the shelf and hold up in production.",
+      hr: "Web stranice koje sam izradila u Reactu i rad s WordPressom i web trgovinama.",
+      en: "Websites I've built in React and work with WordPress and web shops.",
     },
     projects: [
       {
-        id: "baredina",
-        title: { hr: "Baredina — etikete i ambalaža", en: "Baredina — labels & packaging" },
-        thumb: img("radovi/baredina-etikete.jpg"),
-        scope: {
-          hr: ["Prednja i stražnja etiketa", "Ilustracija", "Display ambalaža", "QR kod"],
-          en: ["Front & back label", "Illustration", "Display packaging", "QR code"],
-        },
+        id: "dorigami-web",
+        kind: "client",
+        title: { hr: "Dorigami", en: "Dorigami" },
+        thumb: img("radovi/web-dorigami.jpg"),
+        scope: { hr: ["React", "HR/EN", "Galerija i virtualna šetnja"], en: ["React", "HR/EN", "Gallery & virtual walk"] },
         text: {
-          hr: "Etikete i ambalaža za istarsko ekstra djevičansko maslinovo ulje. Crno-zlatna prednja etiketa s ilustracijom stabla masline, zlatna stražnja etiketa s QR kodom te maslinasti display za policu.",
-          en: "Labels and packaging for an Istrian extra virgin olive oil. A black-and-gold front label with an olive tree illustration, a gold back label with a QR code and an olive-green shelf display.",
+          hr: "Dvojezična React stranica za origami umjetnicu: galerija radova, virtualna šetnja izložbom, tehnike i cjenik.",
+          en: "A bilingual React site for an origami artist: a gallery of works, a virtual exhibition walk, techniques and prices.",
         },
-        tools: ["Illustrator", "Photoshop"],
-        images: [pic("baredina-etikete"), pic("baredina-ambalaza")],
+        href: "https://dorigami.netlify.app/",
       },
       {
-        id: "kutije",
-        title: { hr: "Ambalaža za elektroniku i male kućanske uređaje", en: "Electronics & small appliance packaging" },
-        thumb: img("radovi/ambalaza-karaoke.jpg"),
-        scope: {
-          hr: ["Dizajn kutije", "Lifestyle i produktne fotografije", "Ikone značajki", "Priprema za tisak"],
-          en: ["Box design", "Lifestyle & product photos", "Feature icons", "Prepress"],
-        },
+        id: "ds-studio",
+        kind: "personal",
+        title: { hr: "DS Design Studio", en: "DS Design Studio" },
+        thumb: img("radovi/web-ds-studio.jpg"),
+        scope: { hr: ["React", "Višejezična stranica"], en: ["React", "Multilingual site"] },
         text: {
-          hr: "Ambalaža za proizvode iz razvoja: dječji karaoke zvučnik s razigranom lifestyle fotografijom i kontaktni grill s proizvodom u prvom planu. Posao obuhvaća raspored na dielineu, obradu fotografija, ikone značajki, tekstove i tehnički ispravne datoteke za tiskaru.",
-          en: "Packaging for products in development: a kids' karaoke speaker with a playful lifestyle photo and a contact grill with the product front and centre. The work covers dieline layout, photo editing, feature icons, copy and technically correct files for the printer.",
+          hr: "Višejezična React stranica za studio fotografije, dizajna, videa i weba.",
+          en: "A multilingual React site for a photo, design, video and web studio.",
         },
-        tools: ["Illustrator", "Photoshop", "InDesign"],
-        images: [pic("ambalaza-karaoke"), pic("ambalaza-grill")],
+        href: "https://design-studio-ds.netlify.app/",
+      },
+      {
+        id: "manestra",
+        kind: "edu",
+        title: { hr: "Maneštra Catering", en: "Maneštra Catering" },
+        thumb: img("radovi/web-manestra.jpg"),
+        scope: { hr: ["Front-end", "Ispitni projekt"], en: ["Front-end", "Final exam project"] },
+        text: {
+          hr: "Stranica catering servisa — ispitni projekt front-end developer programa.",
+          en: "A catering website — the final exam project of my front-end developer programme.",
+        },
+        href: "https://manestracatering.netlify.app/",
       },
     ],
   },
   {
-    id: "identitet",
-    title: { hr: "Vizualni identitet", en: "Visual identity" },
+    id: "kampanje",
+    title: { hr: "Društvene mreže i kampanje", en: "Social media & campaigns" },
     text: {
-      hr: "Cjeloviti identiteti — od znaka i palete do primjene u stvarnom prostoru.",
-      en: "Complete identities — from mark and palette to real-world application.",
+      hr: "Video najave, animirani banneri i vizuali za sezonske kampanje.",
+      en: "Video announcements, animated banners and visuals for seasonal campaigns.",
     },
     projects: [
-      {
-        id: "wash",
-        title: { hr: "W.A.S.H. — vizualni identitet", en: "W.A.S.H. — visual identity" },
-        thumb: img("radovi/wash-memorandum.jpg"),
-        scope: {
-          hr: ["Logo", "Memorandum i kuverte", "Brošura", "Izlog i natpisi"],
-          en: ["Logo", "Stationery", "Brochure", "Shop window & signage"],
-        },
-        text: {
-          hr: "Identitet samoposlužne praonice rublja „Wait And Stay Happy”: slova obješena na štipaljke, vodeni motivi i vesela paleta. Primijenjen na memorandum, kuverte, vizitke, brošuru, izlog i natpise.",
-          en: "An identity for the self-service laundry “Wait And Stay Happy”: letters hung on clothes pegs, water motifs and a cheerful palette. Applied to stationery, envelopes, cards, a brochure, shop windows and signage.",
-        },
-        tools: ["Illustrator", "InDesign", "Photoshop"],
-        images: [pic("wash-memorandum"), pic("wash-brosura"), pic("wash-izlog")],
-      },
-      {
-        id: "drive-safe",
-        title: { hr: "Drive Safe — Rent A Car", en: "Drive Safe — Rent A Car" },
-        thumb: img("radovi/drive-safe-logo.jpg"),
-        scope: {
-          hr: ["Logo", "Paleta i tipografija", "Vizitke", "Merch i oglašavanje"],
-          en: ["Logo", "Palette & typography", "Business cards", "Merch & ads"],
-        },
-        text: {
-          hr: "Identitet agencije za najam vozila: znak s automobilom i inicijalima, zeleno-plava paleta, Fira Sans kao tipografija te primjena na vizitke, odjeću, šalice i oglase.",
-          en: "An identity for a car rental agency: a car-and-initials mark, a green-and-blue palette, Fira Sans as the typeface and applications on cards, apparel, mugs and ads.",
-        },
-        tools: ["Illustrator", "Photoshop"],
-        images: ["drive-safe-logo", "drive-safe-boje", "drive-safe-vizitke", "drive-safe-merch"].map((n) => pic(n)),
-        link: { label: "Behance", href: "https://www.behance.net/gallery/179541989/Rent-A-Car-Drive-Safe" },
-      },
-      {
-        id: "hairway",
-        title: { hr: "Hairway to Heaven", en: "Hairway to Heaven" },
-        thumb: img("radovi/hairway-identitet.jpg"),
-        scope: {
-          hr: ["Logo", "Društvene mreže", "Cjenik", "Natpisi i merch"],
-          en: ["Logo", "Social media", "Price list", "Signage & merch"],
-        },
-        text: {
-          hr: "Identitet frizerskog salona u crno-zlatnoj paleti: logo, objave za društvene mreže, cjenik usluga, natpisi i merch.",
-          en: "A black-and-gold identity for a hair salon: logo, social media posts, price list, signage and merch.",
-        },
-        tools: ["Illustrator", "Photoshop", "InDesign"],
-        images: ["hairway-identitet", "hairway-cjenik", "hairway-merch"].map((n) => pic(n)),
-        link: { label: "Behance", href: "https://www.behance.net/gallery/180639775/Hair-salon-Hairway-To-Heaven" },
-      },
-    ],
-  },
-  {
-    id: "digital",
-    title: { hr: "Foto, video i digital", en: "Photo, video & digital" },
-    text: {
-      hr: "Produktni vizuali, videomontaža i digitalna grafika za web i društvene mreže.",
-      en: "Product visuals, video editing and digital graphics for web and social media.",
-    },
-    projects: [
-      {
-        id: "lifestyle",
-        title: { hr: "Produktni i lifestyle vizuali", en: "Product & lifestyle visuals" },
-        thumb: img("radovi/lifestyle-vizual.jpg"),
-        scope: {
-          hr: ["Lifestyle vizuali", "360° fotografija", "Retuš", "Dorada uz AI alate"],
-          en: ["Lifestyle visuals", "360° photography", "Retouching", "AI-assisted refinement"],
-        },
-        text: {
-          hr: "Vizuali proizvoda za web trgovine, kataloge i ambalažu: lifestyle scene, produktne i 360° fotografije. Fotografije obrađujem i retuširam u Photoshopu, a za dorade (proširenje pozadine, čišćenje, kompoziciju scene) koristim i AI alate.",
-          en: "Product visuals for web shops, catalogues and packaging: lifestyle scenes, product shots and 360° photography. I edit and retouch in Photoshop and use AI tools for refinements such as extending backgrounds, clean-up and scene composition.",
-        },
-        tools: ["Photoshop", { hr: "AI alati", en: "AI tools" }],
-        images: [pic("lifestyle-vizual")],
-      },
       {
         id: "video",
         title: { hr: "Videomontaža i animirani banneri", en: "Video editing & animated banners" },
@@ -314,33 +421,19 @@ export const workGroups = [
         ],
         link: { label: "Behance", href: "https://www.behance.net/gallery/178938489/Video-announcement" },
       },
-      {
-        id: "ilustracija",
-        title: { hr: "Ilustracija i digitalna grafika", en: "Illustration & digital art" },
-        thumb: img("radovi/bicikl-merch.jpg"),
-        scope: {
-          hr: ["Vektorska ilustracija", "Merch", "Apstraktne pozadine"],
-          en: ["Vector illustration", "Merch", "Abstract wallpapers"],
-        },
-        text: {
-          hr: "Vektorska ilustracija bicikla primijenjena na majice, torbe, šalice — pa i kao tattoo — te serija apstraktnih digitalnih pozadina.",
-          en: "A vector bicycle illustration applied to T-shirts, tote bags, mugs — and even as a tattoo — plus a series of abstract digital wallpapers.",
-        },
-        tools: ["Illustrator", "Photoshop"],
-        images: [pic("bicikl-merch"), pic("bicikl-tattoo"), pic("apstraktne-pozadine")],
-      },
     ],
   },
   {
-    id: "web-ai",
-    title: { hr: "Web i AI alati", en: "Web & AI tools" },
+    id: "ai",
+    title: { hr: "Rad uz AI alate", en: "AI-assisted workflow" },
     text: {
-      hr: "Stranice koje sam izradila i alati koje sam uz pomoć AI-ja napravila da bi svakodnevni posao bio brži.",
-      en: "Websites I've built and tools I've made with the help of AI to speed up everyday work.",
+      hr: "Alati koje sam uz pomoć AI-ja izradila da bi svakodnevni posao bio brži i točniji.",
+      en: "Tools I've built with the help of AI to make everyday work faster and more accurate.",
     },
     projects: [
       {
         id: "wp-pluginovi",
+        kind: "work",
         title: { hr: "WordPress pluginovi", en: "WordPress plugins" },
         icon: "WP",
         scope: {
@@ -355,6 +448,7 @@ export const workGroups = [
       },
       {
         id: "dokumentacija",
+        kind: "work",
         title: { hr: "Alat za ažuriranje produktne dokumentacije", en: "Product documentation update tool" },
         icon: "DOC",
         scope: {
@@ -366,39 +460,6 @@ export const workGroups = [
           en: "With the help of AI tools I built a program that makes it easier to update the documentation for the products we develop at work. What used to take a lot of manual work is now faster, clearer and less error-prone.",
         },
         tools: [{ hr: "AI alati", en: "AI tools" }],
-      },
-      {
-        id: "dorigami-web",
-        title: { hr: "Dorigami", en: "Dorigami" },
-        icon: "</>",
-        scope: { hr: ["React", "HR/EN", "Galerija i virtualna šetnja"], en: ["React", "HR/EN", "Gallery & virtual walk"] },
-        text: {
-          hr: "Dvojezična React stranica za origami umjetnicu: galerija radova, virtualna šetnja izložbom, tehnike i cjenik.",
-          en: "A bilingual React site for an origami artist: a gallery of works, a virtual exhibition walk, techniques and prices.",
-        },
-        href: "https://dorigami.netlify.app/",
-      },
-      {
-        id: "ds-studio",
-        title: { hr: "DS Design Studio", en: "DS Design Studio" },
-        icon: "</>",
-        scope: { hr: ["React", "Višejezična stranica"], en: ["React", "Multilingual site"] },
-        text: {
-          hr: "Višejezična React stranica za studio fotografije, dizajna, videa i weba.",
-          en: "A multilingual React site for a photo, design, video and web studio.",
-        },
-        href: "https://design-studio-ds.netlify.app/",
-      },
-      {
-        id: "manestra",
-        title: { hr: "Manestra Catering", en: "Manestra Catering" },
-        icon: "</>",
-        scope: { hr: ["Front-end", "Ispitni projekt"], en: ["Front-end", "Final exam project"] },
-        text: {
-          hr: "Stranica catering servisa — ispitni projekt front-end developer programa.",
-          en: "A catering website — the final exam project of my front-end developer programme.",
-        },
-        href: "https://manestracatering.netlify.app/",
       },
     ],
   },

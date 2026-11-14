@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import Img from "./Img";
+import KindBadge from "./KindBadge";
+import KitIcon from "./KitIcon";
 import { useT } from "../i18n";
 
 /**
@@ -39,6 +41,7 @@ export default function ProjectModal({ project, group, onClose, onOpenImage, pau
         </header>
 
         <div className="pm__head">
+          <KindBadge kind={project.kind} />
           <h2>{t(project.title)}</h2>
           <div className="pm__cols">
             <p className="pm__text">{t(project.text)}</p>
@@ -71,6 +74,20 @@ export default function ProjectModal({ project, group, onClose, onOpenImage, pau
             </dl>
           </div>
         </div>
+
+        {project.kit && (
+          <ul className="kit">
+            {project.kit.map((k) => (
+              <li className="kit__item" key={k.icon + t(k.title)}>
+                <span className="kit__visual">
+                  {k.photo ? <Img src={k.photo} alt={t(k.title)} /> : <KitIcon name={k.icon} />}
+                </span>
+                <strong>{t(k.title)}</strong>
+                <span>{t(k.text)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
 
         {images.length > 0 && (
           <div className="pm__images">

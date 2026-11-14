@@ -16,12 +16,13 @@ import Lightbox from "./components/Lightbox";
 import Exhibition from "./components/Exhibition";
 import ProjectModal from "./components/ProjectModal";
 import useReveal from "./components/useReveal";
+import KindBadge from "./components/KindBadge";
 
 const NAV = [
   { id: "sto-radim", key: "navServices" },
+  { id: "fotografija", key: "navPhoto" },
   { id: "radovi", key: "navWork" },
   { id: "o-meni", key: "navAbout" },
-  { id: "fotografija", key: "navPhoto" },
   { id: "iskustvo", key: "navExperience" },
 ];
 
@@ -82,6 +83,30 @@ function Header() {
 }
 
 /* ---------------------------------- Hero ---------------------------------- */
+/* Riječi u naslovu koje se mekano izmjenjuju (sve su složene u istu ćeliju pa se ništa ne pomiče) */
+function RotatingWords({ words }) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    setI(0);
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return undefined;
+    const id = setInterval(() => setI((n) => (n + 1) % words.length), 2600);
+    return () => clearInterval(id);
+  }, [words]);
+  return (
+    <>
+      <span className="rotator" aria-hidden="true">
+        {words.map((w, k) => (
+          <em key={w} className={k === i ? "is-on" : k === (i - 1 + words.length) % words.length ? "is-out" : ""}>
+            {w}
+          </em>
+        ))}
+      </span>
+      <span className="sr-only">{words.join(", ")} </span>
+    </>
+  );
+}
+
 function Hero() {
   const t = useT();
   const roles = t(person.roles);
@@ -96,7 +121,7 @@ function Hero() {
             {t(hero.greeting)}
             <br />
             {t(hero.titleA)}
-            <em>{t(hero.titleAccent)}</em>
+            <RotatingWords words={t(hero.titleWords)} />
             {t(hero.titleB)}
           </h1>
           <p className="hero__lead reveal">{t(hero.lead)}</p>
@@ -175,12 +200,13 @@ function Work({ onOpenProject }) {
   return (
     <section className="section section--work" id="radovi">
       <div className="container">
-        <SectionHead index="02" title={t.ui("workTitle")} text={t.ui("workText")} />
+        <SectionHead index="03" title={t.ui("workTitle")} text={t.ui("workText")} />
 
         <div className="groups">
-          {workGroups.map((g) => (
-            <div className="group" key={g.id}>
+          {workGroups.map((g, gi) => (
+            <div className="group" key={g.id} id={`radovi-${g.id}`}>
               <div className="group__head reveal">
+                <span className="group__index">{String(gi + 1).padStart(2, "0")}</span>
                 <h3>{t(g.title)}</h3>
                 <p>{t(g.text)}</p>
               </div>
@@ -203,6 +229,7 @@ function Work({ onOpenProject }) {
                         </span>
                       )}
                       <span className="tile__body">
+                        <KindBadge kind={p.kind} />
                         <span className="tile__title">{t(p.title)}</span>
                         <span className="tile__scope">{t(p.scope).join(" · ")}</span>
                         {!p.thumb && <span className="tile__text">{t(p.text)}</span>}
@@ -228,7 +255,7 @@ function About() {
   return (
     <section className="section section--tint" id="o-meni">
       <div className="container about">
-        <SectionHead index="03" title={t.ui("aboutTitle")} />
+        <SectionHead index="04" title={t.ui("aboutTitle")} />
         <div className="about__grid">
           <p className="about__lead reveal">{t(about.lead)}</p>
           <div className="about__body">
@@ -256,12 +283,12 @@ function About() {
 function Gallery({ onEnter }) {
   const t = useT();
   const insta = person.links.find((l) => l.label === "Instagram");
-  const preview = photos.slice(0, 3);
+  const preview = photos.slice(0, 10);
 
   return (
     <section className="section" id="fotografija">
       <div className="container">
-        <SectionHead index="04" title={t.ui("photoTitle")} text={t.ui("photoText")}>
+        <SectionHead index="02" title={t.ui("photoTitle")} text={t.ui("photoText")}>
           {insta && (
             <a href={insta.href} target="_blank" rel="noreferrer" className="text-link">
               @dsphotosd <span aria-hidden="true">↗</span>
@@ -278,16 +305,17 @@ function Gallery({ onEnter }) {
               {t.ui("enterExhibition")} <span aria-hidden="true">→</span>
             </button>
           </div>
-          <button className="expo-cta__wall" onClick={onEnter} aria-label={t.ui("enterExhibition")}>
-            {preview.map((ph, i) => (
-              <span className={`expo-cta__frame expo-cta__frame--${i}`} key={i}>
-                <span className="expo-cta__light" />
-                <span className="expo-cta__mat">
-                  <Img src={ph.src} alt="" />
+          <button className="expo-cta__wall mini-ring" onClick={onEnter} aria-label={t.ui("enterExhibition")}>
+            <span className="mini-ring__spin" style={{ "--n": preview.length }}>
+              {preview.map((ph, i) => (
+                <span className="mini-ring__item" key={i} style={{ "--i": i }}>
+                  <span className="mini-ring__mat">
+                    <Img src={ph.src} alt="" />
+                  </span>
                 </span>
-              </span>
-            ))}
-            <span className="expo-cta__floor" />
+              ))}
+            </span>
+            <span className="mini-ring__floor" />
           </button>
         </div>
       </div>
@@ -427,9 +455,9 @@ function Page() {
       <main>
         <Hero />
         <Services />
+        <Gallery onEnter={() => setExpo(true)} />
         <Work onOpenProject={(p, g) => setProject({ project: p, group: g })} />
         <About />
-        <Gallery onEnter={() => setExpo(true)} />
         <Experience />
         <Contact />
       </main>

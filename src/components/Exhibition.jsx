@@ -3,236 +3,257 @@ import Img from "./Img";
 import { useT } from "../i18n";
 import { person } from "../data";
 
-const AUTO_DELAY = 4200; // koliko se dugo stoji ispred svake slike (ms)
-const AUTO_START = 2200; // pauza na uvodnom zidu prije kretanja (ms)
-const EASE = 0.06; // mekoća kretanja (manje = sporije i mekše)
-
 /**
- * Virtualna izložba: fotografije obješene na zid galerije.
- * Šetnja kreće sama; dodir slike, strelice, kotačić ili povlačenje je zaustavljaju.
- * Svo kretanje ide kroz jedan "motor" koji mekano klizi prema cilju.
+ * Kružna izložba: fotografije su obješene u krug oko posjetitelja i polagano kruže.
+ * Povlačenje (mišem ili prstom) okreće krug s inercijom, strelice i kotačić idu
+ * na sljedeću sliku, a klik na sliku sprijeda je otvara preko cijelog ekrana.
  */
+const AUTO_SPEED = 7; // stupnjeva u sekundi dok krug sam kruži
+const RESUME_AFTER = 4500; // nakon koliko ms mirovanja krug opet sam krene
+
+const wrap = (a) => ((((a + 180) % 360) + 360) % 360) - 180;
+
 export default function Exhibition({ photos, onClose, onOpenPhoto, paused }) {
   const t = useT();
-  const trackRef = useRef(null);
-  const roomRef = useRef(null);
-  const target = useRef(0);
-  const raf = useRef(0);
-  const running = useRef(false);
-  const touching = useRef(false);
-  const drag = useRef({ active: false, moved: false, x: 0, left: 0 });
-  const [current, setCurrent] = useState(0); // 0 = uvodni zid
-  const [progress, setProgress] = useState(0);
-  const [playing, setPlaying] = useState(true);
-
-  const pieces = () => Array.from(trackRef.current?.querySelectorAll("[data-stop]") || []);
   const total = photos.length;
-  const lastStop = total + 1;
+  const step = 360 / total;
 
-  /* ---- perspektiva: slike se okreću prema posjetitelju ---- */
-  const update = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const vw = track.clientWidth;
-    const mid = vw / 2;
-    let nearest = 0;
-    let best = Infinity;
-    pieces().forEach((el, i) => {
-      const r = el.getBoundingClientRect();
-      const d = (r.left + r.width / 2 - mid) / vw;
-      const ad = Math.min(Math.abs(d), 1.2);
-      el.style.setProperty("--rot", `${Math.max(-30, Math.min(30, -d * 30))}deg`);
-      el.style.setProperty("--scale", (1 - ad * 0.12).toFixed(4));
-      el.style.setProperty("--light", (1 - Math.min(ad * 1.1, 0.75)).toFixed(3));
-      if (Math.abs(d) < best) {
-        best = Math.abs(d);
-        nearest = i;
+  const stageRef = useRef(null);
+  const ringRef = useRef(null);
+  const itemsRef = useRef([]);
+  const progressRef = useRef(null);
+  const sim = useRef({
+    angle: 0,
+    vel: 0,
+    target: null,
+    dragging: false,
+    lastX: 0,
+    lastT: 0,
+    moved: 0,
+    idleSince: 0,
+  });
+  const playingRef = useRef(true);
+  const pausedRef = useRef(paused);
+  const currentRef = useRef(0);
+  const [current, setCurrent] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [radius, setRadius] = useState(900);
+
+  pausedRef.current = paused;
+  playingRef.current = playing;
+
+  /* ---- veličina kruga prema širini slika ---- */
+  useEffect(() => {
+    const measure = () => {
+      const w = itemsRef.current[0]?.offsetWidth || 300;
+      const gap = w * 0.22;
+      setRadius(Math.round((w + gap) / 2 / Math.tan(Math.PI / total)));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [total]);
+
+  /* ---- jedan motor za svo kretanje ---- */
+  useEffect(() => {
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0;
+    let last = performance.now();
+    const tick = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const s = sim.current;
+      const holding = pausedRef.current;
+
+      if (!s.dragging && !holding) {
+        if (s.target !== null) {
+          // mekano dolazak na odabranu sliku
+          const k = 1 - Math.exp(-dt * 5.5);
+          const d = s.target - s.angle;
+          s.angle += d * k;
+          s.vel = (d * k) / Math.max(dt, 0.001);
+          if (Math.abs(d) < 0.02) {
+            s.angle = s.target;
+            s.target = null;
+            s.vel = 0;
+            s.idleSince = now;
+          }
+        } else {
+          const auto = playingRef.current && !reduce ? -AUTO_SPEED : 0;
+          // inercija se polako stapa u mirno kruženje
+          s.vel += (auto - s.vel) * (1 - Math.exp(-dt * 1.6));
+          s.angle += s.vel * dt;
+          if (!playingRef.current && Math.abs(s.vel) < 0.6 && s.idleSince === 0) {
+            // nakon inercije zaustavi se točno na najbližoj slici
+            s.target = Math.round(s.angle / step) * step;
+          }
+        }
+      }
+
+      if (!playingRef.current && s.idleSince && now - s.idleSince > RESUME_AFTER && !holding && !reduce) {
+        s.idleSince = 0;
+        setPlaying(true);
+      }
+
+      render(s.angle);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [radius, step]);
+
+  /* ---- iscrtavanje: krug + svjetlo na slikama ---- */
+  const render = (angle) => {
+    const ring = ringRef.current;
+    if (!ring) return;
+    ring.style.transform = `translateZ(${-radius}px) rotateY(${angle}deg)`;
+    let best = 0;
+    let bestD = 999;
+    itemsRef.current.forEach((el, i) => {
+      if (!el) return;
+      const rel = wrap(i * step + angle);
+      const d = Math.abs(rel);
+      const light = Math.max(0, Math.cos((Math.min(d, 90) * Math.PI) / 180));
+      el.style.opacity = (0.18 + light * 0.82).toFixed(3);
+      el.style.setProperty("--light", light.toFixed(3));
+      el.style.pointerEvents = d < 75 ? "auto" : "none";
+      if (d < bestD) {
+        bestD = d;
+        best = i;
       }
     });
-    setCurrent(nearest);
-    const max = track.scrollWidth - vw;
-    setProgress(max > 0 ? track.scrollLeft / max : 0);
-    roomRef.current?.style.setProperty("--walk", `${track.scrollLeft}px`);
-  }, []);
-
-  /* ---- motor kretanja ---- */
-  const step = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const cur = track.scrollLeft;
-    const diff = target.current - cur;
-    if (Math.abs(diff) < 0.5) {
-      track.scrollLeft = target.current;
-      running.current = false;
-      return;
+    if (best !== currentRef.current) {
+      currentRef.current = best;
+      setCurrent(best);
     }
-    track.scrollLeft = cur + diff * EASE;
-    raf.current = requestAnimationFrame(step);
-  }, []);
+    if (progressRef.current) progressRef.current.style.transform = `scaleX(${(best + 1) / total})`;
+  };
 
-  const glideTo = useCallback(
-    (x) => {
-      const track = trackRef.current;
-      if (!track) return;
-      const max = track.scrollWidth - track.clientWidth;
-      target.current = Math.max(0, Math.min(max, x));
-      if (!running.current) {
-        running.current = true;
-        raf.current = requestAnimationFrame(step);
-      }
+  /* ---- upravljanje ---- */
+  const stopAuto = () => {
+    setPlaying(false);
+    sim.current.idleSince = 0;
+  };
+
+  const goTo = useCallback(
+    (i) => {
+      const s = sim.current;
+      stopAuto();
+      // najkraći put do slike i
+      const base = s.target ?? s.angle;
+      const want = -i * step;
+      s.target = base + wrap(want - base);
     },
     [step]
   );
 
-  const stopGlide = useCallback(() => {
-    cancelAnimationFrame(raf.current);
-    running.current = false;
-  }, []);
+  const next = () => goTo(currentRef.current + 1);
+  const prev = () => goTo(currentRef.current - 1);
 
-  const goTo = useCallback(
-    (i) => {
-      const list = pieces();
-      const el = list[Math.max(0, Math.min(list.length - 1, i))];
-      const track = trackRef.current;
-      if (!el || !track) return;
-      glideTo(el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2);
-    },
-    [glideTo]
-  );
+  const togglePlay = () => {
+    const s = sim.current;
+    s.target = null;
+    s.idleSince = 0;
+    setPlaying((p) => !p);
+  };
 
-  const userTookOver = () => setPlaying(false);
+  /* povlačenje mišem ili prstom */
+  const onPointerDown = (e) => {
+    const s = sim.current;
+    s.dragging = true;
+    s.target = null;
+    s.moved = 0;
+    s.lastX = e.clientX;
+    s.lastT = performance.now();
+    s.vel = 0;
+    stopAuto();
+    stageRef.current?.setPointerCapture?.(e.pointerId);
+  };
+  const onPointerMove = (e) => {
+    const s = sim.current;
+    if (!s.dragging) return;
+    const now = performance.now();
+    const dx = e.clientX - s.lastX;
+    const deg = (dx / Math.max(320, window.innerWidth)) * 110;
+    s.angle += deg;
+    s.moved += Math.abs(dx);
+    const dt = Math.max(1, now - s.lastT) / 1000;
+    s.vel = s.vel * 0.6 + (deg / dt) * 0.4;
+    s.lastX = e.clientX;
+    s.lastT = now;
+  };
+  const onPointerUp = () => {
+    const s = sim.current;
+    if (!s.dragging) return;
+    s.dragging = false;
+    s.vel = Math.max(-260, Math.min(260, s.vel));
+  };
 
-  /* ---- događaji: scroll, kotačić, dodir ---- */
+  /* kotačić */
   useEffect(() => {
-    const track = trackRef.current;
-    let frame = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(update);
-      if (touching.current) target.current = track.scrollLeft;
-    };
+    const stage = stageRef.current;
+    let acc = 0;
+    let timer = 0;
     const onWheel = (e) => {
       e.preventDefault();
-      setPlaying(false);
-      const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      const base = running.current ? target.current : track.scrollLeft;
-      glideTo(base + delta * 1.6);
+      acc += Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      clearTimeout(timer);
+      if (Math.abs(acc) > 40) {
+        if (acc > 0) next();
+        else prev();
+        acc = 0;
+      }
+      timer = setTimeout(() => (acc = 0), 180);
     };
-    const onTouchStart = () => {
-      touching.current = true;
-      stopGlide();
-      setPlaying(false);
-    };
-    const onTouchEnd = () => {
-      touching.current = false;
-      target.current = track.scrollLeft;
-    };
-    track.addEventListener("scroll", onScroll, { passive: true });
-    track.addEventListener("wheel", onWheel, { passive: false });
-    track.addEventListener("touchstart", onTouchStart, { passive: true });
-    track.addEventListener("touchend", onTouchEnd, { passive: true });
-    window.addEventListener("resize", onScroll);
-    update();
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    track.focus({ preventScroll: true });
-    return () => {
-      cancelAnimationFrame(frame);
-      stopGlide();
-      track.removeEventListener("scroll", onScroll);
-      track.removeEventListener("wheel", onWheel);
-      track.removeEventListener("touchstart", onTouchStart);
-      track.removeEventListener("touchend", onTouchEnd);
-      window.removeEventListener("resize", onScroll);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [update, glideTo, stopGlide]);
+    stage.addEventListener("wheel", onWheel, { passive: false });
+    return () => stage.removeEventListener("wheel", onWheel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  /* ---- automatska šetnja ---- */
-  useEffect(() => {
-    if (!playing || paused) return undefined;
-    if (current >= lastStop) {
-      setPlaying(false);
-      return undefined;
-    }
-    const id = setTimeout(() => goTo(current + 1), current === 0 ? AUTO_START : AUTO_DELAY);
-    return () => clearTimeout(id);
-  }, [playing, paused, current, goTo, lastStop]);
-
-  /* ---- tipkovnica ---- */
+  /* tipkovnica i zaključavanje stranice ispod */
   useEffect(() => {
     if (paused) return undefined;
     const onKey = (e) => {
       if (e.key === "Escape") onClose();
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        setPlaying(false);
-        goTo(current + 1);
+        next();
       }
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        setPlaying(false);
-        goTo(current - 1);
+        prev();
       }
       if (e.key === " ") {
         e.preventDefault();
-        setPlaying((p) => !p);
+        togglePlay();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [current, goTo, onClose, paused]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paused, onClose]);
 
-  /* ---- povlačenje mišem ---- */
-  const onPointerDown = (e) => {
-    if (e.pointerType !== "mouse" || e.button !== 0) return;
-    stopGlide();
-    drag.current = { active: true, moved: false, x: e.clientX, left: trackRef.current.scrollLeft };
-  };
-  const onPointerMove = (e) => {
-    const d = drag.current;
-    if (!d.active) return;
-    const dx = e.clientX - d.x;
-    if (Math.abs(dx) > 5 && !d.moved) {
-      d.moved = true;
-      userTookOver();
-    }
-    if (d.moved) trackRef.current.scrollLeft = d.left - dx;
-  };
-  const endDrag = () => {
-    if (drag.current.active) target.current = trackRef.current.scrollLeft;
-    drag.current.active = false;
-  };
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
 
-  /* ---- klik na sliku: zaustavi šetnju, a zaustavljenu sliku uvećaj ---- */
   const onClickPiece = (i) => {
-    if (drag.current.moved) {
-      drag.current.moved = false;
-      return;
-    }
-    if (playing) {
-      setPlaying(false);
-      goTo(i + 1);
-      return;
-    }
-    if (current !== i + 1) {
-      goTo(i + 1);
-      return;
-    }
-    onOpenPhoto(i);
-  };
-
-  const togglePlay = () => {
-    if (!playing && current >= lastStop) goTo(0);
-    setPlaying(!playing);
+    if (sim.current.moved > 6) return; // bilo je povlačenje, ne klik
+    if (i === currentRef.current && sim.current.target === null && !playing) onOpenPhoto(i);
+    else goTo(i);
   };
 
   const insta = person.links.find((l) => l.label === "Instagram");
-  const shown = Math.min(Math.max(current, 1), total);
+  const ph = photos[current];
 
   return (
-    <div className="expo" role="dialog" aria-modal="true" aria-label={t.ui("exhibitionEyebrow")}>
-      <div className="expo__room" ref={roomRef} aria-hidden="true">
+    <div className="expo expo--ring" role="dialog" aria-modal="true" aria-label={t.ui("exhibitionEyebrow")}>
+      <div className="expo__room" aria-hidden="true">
         <div className="expo__wall" />
         <div className="expo__floor" />
       </div>
@@ -243,7 +264,7 @@ export default function Exhibition({ photos, onClose, onOpenPhoto, paused }) {
           <span>{t.ui("exTitle")}</span>
         </div>
         <span className="expo__counter">
-          {current === 0 ? "—" : String(shown).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          {String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
         </span>
         <button className="expo__exit" onClick={onClose}>
           {t.ui("exExit")} <span aria-hidden="true">✕</span>
@@ -251,85 +272,49 @@ export default function Exhibition({ photos, onClose, onOpenPhoto, paused }) {
       </header>
 
       <div
-        className="expo__track"
-        ref={trackRef}
-        tabIndex={-1}
+        className="ring__stage"
+        ref={stageRef}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerLeave={endDrag}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
       >
-        <section className="expo__panel expo__panel--intro" data-stop>
-          <span className="expo__eyebrow">{t.ui("exhibitionEyebrow")}</span>
-          <h2>{t.ui("exTitle")}</h2>
-          <p className="expo__author">
-            {person.name} · {t.ui("exSubtitle")}
-          </p>
-          <p>{t.ui("exIntro")}</p>
-          <button
-            className="btn"
-            onClick={() => {
-              setPlaying(true);
-              goTo(1);
-            }}
-          >
-            {t.ui("exStart")}
-          </button>
-        </section>
-
-        {photos.map((ph, i) => (
-          <figure className={`expo__piece ${current === i + 1 ? "is-current" : ""}`} data-stop key={i}>
-            <div className="expo__lamp" />
-            <div className="expo__glow" />
-            <button
-              className="expo__frame"
-              onClick={() => onClickPiece(i)}
-              aria-label={`${t.ui("open")}: ${ph.alt}`}
-              style={{ cursor: playing || current !== i + 1 ? "pointer" : "zoom-in" }}
+        <div className="ring" ref={ringRef}>
+          {photos.map((p, i) => (
+            <figure
+              key={i}
+              ref={(el) => (itemsRef.current[i] = el)}
+              className={`ring__item ${current === i ? "is-current" : ""}`}
+              style={{ transform: `rotateY(${i * step}deg) translateZ(${radius}px)` }}
             >
-              <span className="expo__mat">
-                <Img src={ph.src} alt={ph.alt} draggable="false" />
-              </span>
-            </button>
-            <figcaption className="expo__placard">
-              <span className="expo__no">No. {ph.no}</span>
-              <strong>{person.name}</strong>
-              <span>{t.ui("exMedium")}</span>
-            </figcaption>
-          </figure>
-        ))}
+              <button
+                className="ring__frame"
+                onClick={() => onClickPiece(i)}
+                aria-label={`${t.ui("open")}: ${p.alt}`}
+                style={{ cursor: current === i && !playing ? "zoom-in" : "pointer" }}
+              >
+                <span className="ring__mat">
+                  <Img src={p.src} alt={p.alt} draggable="false" />
+                </span>
+              </button>
+            </figure>
+          ))}
+        </div>
+      </div>
 
-        <section className="expo__panel expo__panel--end" data-stop>
-          <h2>{t.ui("exEndTitle")}</h2>
-          <p>{t.ui("exEndText")}</p>
-          <div className="expo__end-actions">
-            {insta && (
-              <a className="btn" href={insta.href} target="_blank" rel="noreferrer">
-                @dsphotosd ↗
-              </a>
-            )}
-            <button
-              className="btn btn--ghost"
-              onClick={() => {
-                setPlaying(false);
-                goTo(0);
-              }}
-            >
-              {t.ui("exBack")}
-            </button>
-          </div>
-        </section>
+      <div className="ring__caption" aria-live="polite">
+        <span className="expo__no">No. {ph?.no}</span>
+        <strong>{person.name}</strong>
+        <span>{t.ui("exMedium")}</span>
+        {insta && (
+          <a className="ring__insta" href={insta.href} target="_blank" rel="noreferrer">
+            @dsphotosd ↗
+          </a>
+        )}
       </div>
 
       <div className="expo__controls">
-        <button
-          onClick={() => {
-            userTookOver();
-            goTo(current - 1);
-          }}
-          aria-label={t.ui("prev")}
-          disabled={current === 0}
-        >
+        <button onClick={prev} aria-label={t.ui("prev")}>
           ←
         </button>
         <button className="expo__play" onClick={togglePlay} aria-label={playing ? t.ui("exPause") : t.ui("exPlay")}>
@@ -345,16 +330,9 @@ export default function Exhibition({ photos, onClose, onOpenPhoto, paused }) {
           )}
         </button>
         <div className="expo__progress" aria-hidden="true">
-          <span style={{ transform: `scaleX(${progress})` }} />
+          <span ref={progressRef} style={{ transform: `scaleX(${1 / total})` }} />
         </div>
-        <button
-          onClick={() => {
-            userTookOver();
-            goTo(current + 1);
-          }}
-          aria-label={t.ui("next")}
-          disabled={current === lastStop}
-        >
+        <button onClick={next} aria-label={t.ui("next")}>
           →
         </button>
       </div>

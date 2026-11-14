@@ -360,11 +360,37 @@ p {
   margin-bottom: 28px;
 }
 .dot {
+  position: relative;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: #2fb36d;
   box-shadow: 0 0 0 4px rgba(47, 179, 109, 0.18);
+}
+/* nježno pulsiranje zelene točke */
+.dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #2fb36d;
+  animation: dot-pulse 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes dot-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dot::after {
+    animation: none;
+  }
 }
 .hero__title {
   font-size: clamp(36px, 4.6vw, 64px);
@@ -390,7 +416,7 @@ p {
 }
 .hero__visual {
   position: relative;
-  max-width: 440px;
+  max-width: 360px;
   justify-self: end;
   width: 100%;
 }
@@ -1113,8 +1139,9 @@ p {
   flex: none;
   margin: 0;
   transform: rotateY(var(--rot, 0deg)) scale(var(--scale, 1));
-  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: transform;
+  backface-visibility: hidden;
 }
 .expo__lamp {
   position: absolute;
@@ -1137,7 +1164,7 @@ p {
   pointer-events: none;
   background: radial-gradient(ellipse 50% 60% at 50% 18%, rgba(255, 243, 210, 0.95), rgba(255, 243, 210, 0) 70%);
   opacity: var(--light, 1);
-  transition: opacity 0.4s;
+  transition: opacity 0.6s ease-out;
 }
 .expo__frame {
   display: block;
@@ -1532,9 +1559,15 @@ p {
     grid-template-columns: 1fr;
   }
   .hero__visual {
+    order: -1;
     justify-self: start;
-    max-width: 380px;
-    margin: 10px auto 0;
+    max-width: 140px;
+    margin: 0 0 -12px;
+  }
+  .hero__photo {
+    aspect-ratio: 1 / 1;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px -24px rgba(23, 22, 26, 0.45);
   }
   .about__grid,
   .exp-grid {
@@ -1646,5 +1679,340 @@ p {
   .pm__sheet,
   .pm__bar {
     border-radius: 0;
+  }
+}
+
+/* ===================== Nadopune: naslov, oznake, skupine, studio ===================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+/* riječi koje se izmjenjuju — sve u istoj ćeliji, pa se tekst ispod ne pomiče */
+.rotator {
+  display: grid;
+  margin: 0.04em 0 0.06em;
+}
+.rotator em {
+  grid-area: 1 / 1;
+  font-style: normal;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateY(0.45em);
+  filter: blur(4px);
+  transition: opacity 0.7s var(--ease), transform 0.9s var(--ease), filter 0.7s var(--ease);
+}
+.rotator em.is-on {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+.rotator em.is-out {
+  transform: translateY(-0.45em);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rotator em {
+    transition: none;
+    filter: none;
+    transform: none;
+  }
+}
+
+/* redni broj skupine radova */
+.group__index {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+/* oznaka vrste projekta */
+.kind {
+  align-self: flex-start;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--bg-tint);
+  color: var(--ink-soft);
+}
+.kind--work {
+  background: var(--ink);
+  color: var(--bg);
+}
+.kind--client {
+  background: var(--accent-soft);
+  color: #a3301c;
+}
+.kind--edu {
+  background: transparent;
+  border: 1px solid var(--line);
+}
+.tile--text .kind {
+  background: var(--surface);
+}
+.tile--text .kind--work {
+  background: var(--ink);
+}
+.pm__head .kind {
+  margin-bottom: 14px;
+}
+
+/* oprema mini studija u pogledu projekta */
+.kit {
+  list-style: none;
+  margin: 0;
+  padding: 0 clamp(20px, 4vw, 48px) clamp(24px, 3vw, 36px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+}
+.kit__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--bg-tint);
+}
+.kit__visual {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  overflow: hidden;
+}
+.kit__visual img {
+  transition: transform 0.8s var(--ease);
+}
+.kit__item:hover .kit__visual img {
+  transform: scale(1.05);
+}
+.kit__visual svg {
+  width: 46%;
+  height: auto;
+}
+.kit__visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.kit__item strong {
+  font-family: var(--font-display);
+  font-size: 15px;
+}
+.kit__item span:last-child {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+@media (max-width: 860px) {
+  .kit {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===================== Kružna izložba ===================== */
+.ring__stage {
+  position: absolute;
+  inset: 70px 0 0 0;
+  z-index: 2;
+  perspective: 1500px;
+  perspective-origin: 50% 42%;
+  display: grid;
+  place-items: center;
+  padding-bottom: 18vh;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ring__stage:active {
+  cursor: grabbing;
+}
+.ring {
+  position: relative;
+  width: var(--ring-w);
+  height: calc(var(--ring-w) * 1.25);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.expo--ring {
+  --ring-w: clamp(200px, 22vw, 320px);
+}
+.ring__item {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+.ring__frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: clamp(5px, 0.6vw, 9px);
+  background: #1c1a19;
+  box-shadow: 0 40px 60px -30px rgba(40, 28, 16, calc(0.2 + var(--light, 1) * 0.4)), 0 6px 14px rgba(0, 0, 0, 0.16);
+}
+.ring__mat {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 10%;
+  background: #fbfaf7;
+}
+.ring__mat img,
+.ring__mat .img-fallback {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+/* svjetlo reflektora na slici sprijeda */
+.ring__item::before {
+  content: "";
+  position: absolute;
+  left: -40%;
+  right: -40%;
+  top: -18%;
+  bottom: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 50% 55% at 50% 22%, rgba(255, 243, 210, 0.9), rgba(255, 243, 210, 0) 70%);
+  opacity: var(--light, 0);
+}
+.ring__caption {
+  position: absolute;
+  left: 50%;
+  bottom: calc(5vh + 74px);
+  z-index: 3;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 10px 16px;
+  background: #fbfaf7;
+  box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.35);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  width: max-content;
+  max-width: 92vw;
+}
+.ring__caption .expo__no {
+  margin: 0;
+}
+.ring__caption strong {
+  color: var(--ink);
+}
+.ring__insta {
+  color: var(--accent);
+  font-weight: 600;
+}
+.expo--ring .expo__hint {
+  color: var(--ink-soft);
+}
+@media (max-width: 700px) {
+  .expo--ring {
+    --ring-w: 58vw;
+  }
+  .ring__stage {
+    padding-bottom: 24vh;
+  }
+  .ring__caption {
+    bottom: calc(5vh + 66px);
+  }
+  .ring__caption > span:not(.expo__no) {
+    display: none;
+  }
+}
+
+/* ===================== Mini krug fotografija (ulaz u izložbu) ===================== */
+.mini-ring {
+  --w: clamp(96px, 9vw, 130px);
+  perspective: 900px;
+  perspective-origin: 50% 35%;
+  min-height: clamp(320px, 30vw, 400px);
+  cursor: pointer;
+  padding-bottom: 40px;
+}
+.mini-ring__spin {
+  position: relative;
+  width: var(--w);
+  height: calc(var(--w) * 1.25);
+  transform-style: preserve-3d;
+  animation: mini-ring-spin 40s linear infinite;
+}
+.mini-ring:hover .mini-ring__spin {
+  animation-duration: 18s;
+}
+@keyframes mini-ring-spin {
+  from {
+    transform: translateZ(calc(var(--w) * -1.9)) rotateY(0deg);
+  }
+  to {
+    transform: translateZ(calc(var(--w) * -1.9)) rotateY(-360deg);
+  }
+}
+.mini-ring__item {
+  position: absolute;
+  inset: 0;
+  padding: 4px;
+  background: #1d1b1a;
+  box-shadow: 0 16px 26px -14px rgba(0, 0, 0, 0.5);
+  transform: rotateY(calc(360deg / var(--n) * var(--i))) translateZ(calc(var(--w) * 1.9));
+}
+.mini-ring__mat {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 8%;
+  background: #fbfaf7;
+}
+.mini-ring__mat img,
+.mini-ring__mat .img-fallback {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+  font-size: 0;
+}
+.mini-ring__floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 20%;
+  background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 70px),
+    linear-gradient(180deg, #a07c5e, #7d5c42);
+  border-top: 6px solid #d7cfc2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mini-ring__spin {
+    animation: none;
+    transform: translateZ(calc(var(--w) * -1.9));
+  }
+}
+@media (max-width: 860px) {
+  .expo-cta {
+    grid-template-columns: 1fr;
   }
 }
