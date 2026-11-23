@@ -245,18 +245,18 @@ export const workGroups = [
       {
         id: "vizitke",
         title: { hr: "Izrada vizitki", en: "Business cards" },
-        thumb: img("radovi/dorigami-vizitka-cut.jpg"),
+        thumb: img("radovi/dorigami-vizitka-zdral.jpg"),
         scope: {
           hr: ["Dizajn prednje i stražnje strane", "Hijerarhija kontakt podataka", "Priprema za tisak"],
           en: ["Front & back design", "Contact hierarchy", "Prepress"],
         },
         text: {
-          hr: "Vizitke za tri različita klijenta, svaka u jeziku svog identiteta. Dorigami: geometrijski origami znak u zlatnim tonovima na tamnoljubičastoj podlozi, a na poleđini kontakti i web adresa uz ukrasnu traku s rozetom. Studio Design: tamna brušena metalna tekstura s magenta-ljubičastim valom. Drive Safe: živa zelena i tamnoplava iz identiteta agencije, sa sloganom na prednjoj strani i ikonama kontakata na stražnjoj.",
-          en: "Business cards for three different clients, each speaking the language of its own identity. Dorigami: a geometric origami mark in gold tones on deep plum, with the contacts and web address on the back beside a decorative band with the rosette. Studio Design: a dark brushed-metal texture with a magenta-violet wave. Drive Safe: the agency's vivid green and deep blue, with the slogan on the front and contact icons on the back.",
+          hr: "Vizitke za tri različita klijenta, svaka u jeziku svog identiteta. Dorigami: origami ždral od geometrijskih ploha u oker i šljiva tonovima brenda, a na poleđini kontakti i QR kod koji vodi na web stranicu. Studio Design: tamna brušena metalna tekstura s magenta-ljubičastim valom. Drive Safe: živa zelena i tamnoplava iz identiteta agencije, sa sloganom na prednjoj strani i ikonama kontakata na stražnjoj.",
+          en: "Business cards for three different clients, each speaking the language of its own identity. Dorigami: an origami crane built from geometric planes in the brand's ochre and plum tones, with the contacts and a QR code linking to the website on the back. Studio Design: a dark brushed-metal texture with a magenta-violet wave. Drive Safe: the agency's vivid green and deep blue, with the slogan on the front and contact icons on the back.",
         },
         tools: ["Illustrator", "Photoshop"],
         images: [
-          pic("dorigami-vizitka-cut"),
+          pic("dorigami-vizitka-zdral"),
           pic("studio-design-vizitke-cut"),
           pic("drive-safe-vizitke-izrez-cut"),
         ],
